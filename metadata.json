@@ -1,0 +1,6 @@
+{
+  "name": "LPK SM FLASHER TRAINING CENTRE",
+  "description": "Portal Pelatihan Teknisi Telepon Seluler Basic to Expert LPK SM FLASHER TRAINING CENTRE - Akses Modul Video, Skematik & Manajemen Peserta.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
