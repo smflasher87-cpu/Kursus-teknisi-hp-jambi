@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { ShieldCheck, Lock, User as UserIcon, Eye, EyeOff, AlertCircle, Wrench, GraduationCap, UserPlus } from 'lucide-react';
+import { ShieldCheck, Lock, User as UserIcon, Eye, EyeOff, AlertCircle, Wrench, GraduationCap, UserPlus, CheckCircle2, Key } from 'lucide-react';
 import bgImage from '../assets/images/smflasher_bg_1786027934305.jpg';
 
 interface LoginPageProps {
@@ -10,9 +10,25 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onOpenRegistration }) => {
-  // STRICT REQUIREMENT: Username and Password inputs MUST BE EMPTY on page load
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // Check for remembered login info on mount
+  const [rememberMe, setRememberMe] = useState<boolean>(() => {
+    return localStorage.getItem('sm_flasher_remember_me_enabled') === 'true';
+  });
+
+  const [username, setUsername] = useState<string>(() => {
+    if (localStorage.getItem('sm_flasher_remember_me_enabled') === 'true') {
+      return localStorage.getItem('sm_flasher_remember_username') || '';
+    }
+    return '';
+  });
+
+  const [password, setPassword] = useState<string>(() => {
+    if (localStorage.getItem('sm_flasher_remember_me_enabled') === 'true') {
+      return localStorage.getItem('sm_flasher_remember_password') || '';
+    }
+    return '';
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +69,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onO
         );
         setIsLoading(false);
         return;
+      }
+
+      // Handle Remember Login Info
+      if (rememberMe) {
+        localStorage.setItem('sm_flasher_remember_me_enabled', 'true');
+        localStorage.setItem('sm_flasher_remember_username', trimmedUsername);
+        localStorage.setItem('sm_flasher_remember_password', trimmedPassword);
+      } else {
+        localStorage.removeItem('sm_flasher_remember_me_enabled');
+        localStorage.removeItem('sm_flasher_remember_username');
+        localStorage.removeItem('sm_flasher_remember_password');
       }
 
       setIsLoading(false);
@@ -198,6 +225,33 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onO
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+            </div>
+
+            {/* Remember Me Checkbox */}
+            <div className="pt-1 pb-1 flex flex-col space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center space-x-2.5 cursor-pointer text-slate-700 hover:text-slate-900 group select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                  />
+                  <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-600 transition">
+                    Ingat Info Login (Remember Me)
+                  </span>
+                </label>
+
+                {rememberMe && (
+                  <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>Tersimpan Otomatis</span>
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 pl-6 leading-relaxed">
+                Centang opsi ini agar Anda dapat langsung masuk tanpa memasukkan ulang username dan password di perangkat ini.
+              </p>
             </div>
 
             <button

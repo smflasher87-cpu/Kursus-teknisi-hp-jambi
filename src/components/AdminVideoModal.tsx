@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Video } from '../types';
-import { X, Film, Plus, Trash2, Edit3, FileText, CheckCircle2 } from 'lucide-react';
+import { X, Film, Plus, Trash2, Edit3, FileText, CheckCircle2, Upload, HardDrive, Play, Link } from 'lucide-react';
 
 interface AdminVideoModalProps {
   videos: Video[];
@@ -33,6 +33,9 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [videoUrl, setVideoUrl] = useState('');
+  const [videoSourceType, setVideoSourceType] = useState<'upload' | 'url'>('upload');
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [uploadedFileSize, setUploadedFileSize] = useState('');
   const [duration, setDuration] = useState('20:00');
   const [description, setDescription] = useState('');
   const [pdfTitle, setPdfTitle] = useState('');
@@ -40,13 +43,18 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
   const [tagsInput, setTagsInput] = useState('');
 
   const [notification, setNotification] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpenNewForm = () => {
     setEditingVideo(null);
     setTitle('');
     setCategory(CATEGORIES[0]);
-    setVideoUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
-    setDuration('25:00');
+    setVideoUrl('');
+    setVideoSourceType('upload');
+    setUploadedFileName('');
+    setUploadedFileSize('');
+    setDuration('20:00');
     setDescription('');
     setPdfTitle('');
     setPdfContent('');
@@ -60,6 +68,9 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
     setTitle(v.title);
     setCategory(v.category);
     setVideoUrl(v.videoUrl);
+    setVideoSourceType(v.videoUrl.startsWith('data:') || v.videoUrl.startsWith('blob:') ? 'upload' : 'url');
+    setUploadedFileName(v.videoUrl.startsWith('data:') ? 'Video_Terupload.mp4' : '');
+    setUploadedFileSize('');
     setDuration(v.duration);
     setDescription(v.description);
     setPdfTitle(v.pdfTitle || '');
@@ -69,8 +80,41 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
     setNotification('');
   };
 
+  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      alert('Silakan pilih file video yang valid (contoh: MP4, WebM, MKV, AVI).');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadedFileName(file.name);
+    setUploadedFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setVideoUrl(result);
+      setIsUploading(false);
+
+      if (!title.trim()) {
+        const titleFromFileName = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+        setTitle(titleFromFileName);
+      }
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!videoUrl) {
+      alert('Silakan upload file video dari penyimpanan atau masukkan URL video!');
+      return;
+    }
 
     const tagsArray = tagsInput
       .split(',')
@@ -112,7 +156,7 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
         createdAt: new Date().toISOString()
       };
       onAddVideo(newVid);
-      setNotification('Video pelatihan baru berhasil ditambahkan!');
+      setNotification('Video pelatihan baru berhasil ditambahkan dan tersimpan!');
     }
 
     setIsFormOpen(false);
@@ -223,16 +267,115 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">URL Stream / MP4 Video</label>
-                <input
-                  type="text"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:ring-1 focus:ring-amber-500"
-                  required
-                />
+              {/* Video Source Selection (File Upload vs Link URL) */}
+              <div className="space-y-2 bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
+                    <Film className="w-4 h-4 text-indigo-400" />
+                    <span>Sumber File Video Pelatihan *</span>
+                  </label>
+                  <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setVideoSourceType('upload')}
+                      className={`px-3 py-1 text-[11px] font-bold rounded-md transition flex items-center space-x-1 ${
+                        videoSourceType === 'upload'
+                          ? 'bg-indigo-600 text-white shadow'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <HardDrive className="w-3 h-3" />
+                      <span>Upload Penyimpanan (PC/HP)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVideoSourceType('url')}
+                      className={`px-3 py-1 text-[11px] font-bold rounded-md transition flex items-center space-x-1 ${
+                        videoSourceType === 'url'
+                          ? 'bg-indigo-600 text-white shadow'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <Link className="w-3 h-3" />
+                      <span>URL Streaming Direct</span>
+                    </button>
+                  </div>
+                </div>
+
+                {videoSourceType === 'upload' ? (
+                  <div className="space-y-3 pt-1">
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 bg-slate-950/70 hover:bg-slate-950 p-5 rounded-xl text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2 group"
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="video/mp4,video/webm,video/ogg,video/mkv,video/avi,video/*"
+                        onChange={handleVideoFileUpload}
+                        className="hidden"
+                      />
+
+                      <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-full group-hover:scale-110 transition border border-indigo-500/30">
+                        <Upload className="w-6 h-6" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-200">
+                          {isUploading ? 'Memproses & Memuat File Video...' : 'Pilih / Unggah File Video dari Penyimpanan Perangkat'}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          Mendukung format MP4, WebM, MKV, AVI. File akan tersimpan langsung di sistem aplikasi.
+                        </p>
+                      </div>
+
+                      {uploadedFileName && (
+                        <div className="mt-2 inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/40">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="truncate max-w-[200px]">{uploadedFileName}</span>
+                          {uploadedFileSize && <span className="opacity-75">({uploadedFileSize})</span>}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Base64 / Data URL / Direct Video Input Fallback */}
+                    {videoUrl && (
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-slate-400 block font-mono truncate">
+                          Data Video ID: {videoUrl.substring(0, 60)}...
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="text"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      placeholder="Masukkan URL Video Direct MP4 / WebM (https://...)"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:ring-1 focus:ring-amber-500 font-mono"
+                      required={videoSourceType === 'url'}
+                    />
+                  </div>
+                )}
+
+                {/* Live Preview Box */}
+                {videoUrl && (
+                  <div className="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
+                      <span className="flex items-center space-x-1.5 text-emerald-400">
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Pratinjau Video (Video File Ready)</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400">Dapat Diputar Siswa</span>
+                    </div>
+
+                    <div className="relative aspect-video bg-black rounded-lg overflow-hidden border border-slate-800">
+                      <video src={videoUrl} controls className="w-full h-full object-contain" />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

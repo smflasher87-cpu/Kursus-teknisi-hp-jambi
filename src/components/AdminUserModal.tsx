@@ -73,7 +73,7 @@ export const AdminUserModal: React.FC<AdminUserModalProps> = ({
 
     onAddUser(createdUser);
 
-    setSuccessMsg(`Akun untuk "${nameTrim}" (@${usernameTrim}) berhasil didaftarkan! User dapat langsung login.`);
+    setSuccessMsg(`Akun untuk "${nameTrim}" (@${usernameTrim}) berhasil didaftarkan secara PERMANEN! Username dan password baru dapat digunakan berkali-kali selamanya sampai admin mengubah atau menghapusnya.`);
     setNewUsername('');
     setNewPassword('');
     setNewName('');
