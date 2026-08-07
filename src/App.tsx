@@ -29,7 +29,9 @@ import {
   INITIAL_CHAT_MESSAGES,
   INITIAL_PART_COMPATIBLE,
   INITIAL_FREE_TOOLS,
-  INITIAL_ZOOM_MEETINGS
+  INITIAL_ZOOM_MEETINGS,
+  INITIAL_PDF_MODULES,
+  INITIAL_LCD_COMPATIBILITY
 } from './data/initialData';
 
 import { LoginPage } from './components/LoginPage';
@@ -58,6 +60,10 @@ import { PartCompatibleView } from './components/PartCompatibleView';
 import { FreeSoftwareToolsView } from './components/FreeSoftwareToolsView';
 import { ZoomMeetingView } from './components/ZoomMeetingView';
 import { FloatingChatWidget } from './components/FloatingChatWidget';
+import { TopMarqueeBar } from './components/TopMarqueeBar';
+import { CertificateView } from './components/CertificateView';
+import { PdfModulesView, PdfModule } from './components/PdfModulesView';
+import { LcdCompatibilityView, LcdCompatibilityItem } from './components/LcdCompatibilityView';
 
 import bgImage from './assets/images/smflasher_bg_1786027934305.jpg';
 
@@ -222,6 +228,24 @@ export default function App() {
     return INITIAL_ZOOM_MEETINGS;
   });
 
+  // PDF Modules
+  const [pdfModules, setPdfModules] = useState<PdfModule[]>(() => {
+    const saved = localStorage.getItem('sm_flasher_pdf_modules');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return INITIAL_PDF_MODULES;
+  });
+
+  // LCD Compatibility Items
+  const [lcdItems, setLcdItems] = useState<LcdCompatibilityItem[]>(() => {
+    const saved = localStorage.getItem('sm_flasher_lcd_items');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return INITIAL_LCD_COMPATIBILITY;
+  });
+
   // Completed Map
   const [completedMap, setCompletedMap] = useState<Record<string, string[]>>(() => {
     const saved = localStorage.getItem('sm_flasher_completed_map');
@@ -298,14 +322,67 @@ export default function App() {
         if (e.key === 'sm_flasher_free_tools') setFreeTools(data);
         if (e.key === 'sm_flasher_zoom_meetings') setZoomMeetings(data);
         if (e.key === 'sm_flasher_completed_map') setCompletedMap(data);
+        if (e.key === 'sm_flasher_pdf_modules') setPdfModules(data);
+        if (e.key === 'sm_flasher_lcd_items') setLcdItems(data);
       } catch (err) {
         console.error('Storage sync error:', err);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+
+    // BroadcastChannel sync for cross-tab realtime updates
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('sm_flasher_bc_channel');
+      bc.onmessage = (event) => {
+        if (!event.data) return;
+        const { key, payload } = event.data;
+        if (key === 'users') {
+          setUsers(payload);
+          setCurrentUser((prev) => {
+            if (!prev) return null;
+            const updatedSelf = payload.find((u: User) => u.id === prev.id);
+            return updatedSelf ? updatedSelf : prev;
+          });
+        }
+        if (key === 'videos') setVideos(payload);
+        if (key === 'gallery') setGalleryItems(payload);
+        if (key === 'pdf_modules') setPdfModules(payload);
+        if (key === 'lcd_items') setLcdItems(payload);
+        if (key === 'announcements') setAnnouncements(payload);
+        if (key === 'chat_messages') setChatMessages(payload);
+        if (key === 'categories') setCategories(payload);
+      };
+    } catch (err) {}
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      if (bc) bc.close();
+    };
   }, []);
+
+  const broadcastChange = (key: string, payload: any) => {
+    try {
+      const bc = new BroadcastChannel('sm_flasher_bc_channel');
+      bc.postMessage({ key, payload });
+      bc.close();
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm_flasher_users', JSON.stringify(users));
+      broadcastChange('users', users);
+    } catch (e) {}
+  }, [users]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm_flasher_videos', JSON.stringify(videos));
+      broadcastChange('videos', videos);
+    } catch (e) {}
+  }, [videos]);
 
   useEffect(() => { try { localStorage.setItem('sm_flasher_admin_settings', JSON.stringify(adminSettings)); } catch (e) {} }, [adminSettings]);
   useEffect(() => { try { localStorage.setItem('sm_flasher_institution_profile', JSON.stringify(institutionProfile)); } catch (e) {} }, [institutionProfile]);
@@ -313,14 +390,55 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('sm_flasher_alumni', JSON.stringify(alumniList)); } catch (e) {} }, [alumniList]);
   useEffect(() => { try { localStorage.setItem('sm_flasher_cases', JSON.stringify(casePosts)); } catch (e) {} }, [casePosts]);
   useEffect(() => { try { localStorage.setItem('sm_flasher_jobs', JSON.stringify(jobOpenings)); } catch (e) {} }, [jobOpenings]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_gallery', JSON.stringify(galleryItems)); } catch (e) {} }, [galleryItems]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_announcements', JSON.stringify(announcements)); } catch (e) {} }, [announcements]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_chat_messages', JSON.stringify(chatMessages)); } catch (e) {} }, [chatMessages]);
+  
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm_flasher_gallery', JSON.stringify(galleryItems));
+      broadcastChange('gallery', galleryItems);
+    } catch (e) {}
+  }, [galleryItems]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm_flasher_announcements', JSON.stringify(announcements));
+      broadcastChange('announcements', announcements);
+    } catch (e) {}
+  }, [announcements]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm_flasher_chat_messages', JSON.stringify(chatMessages));
+      broadcastChange('chat_messages', chatMessages);
+    } catch (e) {}
+  }, [chatMessages]);
+
   useEffect(() => { try { localStorage.setItem('sm_flasher_pcd_items', JSON.stringify(pcdItems)); } catch (e) {} }, [pcdItems]);
   useEffect(() => { try { localStorage.setItem('sm_flasher_free_tools', JSON.stringify(freeTools)); } catch (e) {} }, [freeTools]);
   useEffect(() => { try { localStorage.setItem('sm_flasher_zoom_meetings', JSON.stringify(zoomMeetings)); } catch (e) {} }, [zoomMeetings]);
   useEffect(() => { try { localStorage.setItem('sm_flasher_completed_map', JSON.stringify(completedMap)); } catch (e) {} }, [completedMap]);
   useEffect(() => { try { localStorage.setItem('sm_flasher_notes_map', JSON.stringify(notesMap)); } catch (e) {} }, [notesMap]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm_flasher_pdf_modules', JSON.stringify(pdfModules));
+      broadcastChange('pdf_modules', pdfModules);
+    } catch (e) {}
+  }, [pdfModules]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm_flasher_lcd_items', JSON.stringify(lcdItems));
+      broadcastChange('lcd_items', lcdItems);
+    } catch (e) {}
+  }, [lcdItems]);
+
+  // PDF Module Handlers
+  const handleAddPdfModule = (newModule: PdfModule) => setPdfModules((prev) => [newModule, ...prev]);
+  const handleDeletePdfModule = (id: string) => setPdfModules((prev) => prev.filter((p) => p.id !== id));
+
+  // LCD Compatibility Handlers
+  const handleAddLcdItem = (newItem: LcdCompatibilityItem) => setLcdItems((prev) => [newItem, ...prev]);
+  const handleDeleteLcdItem = (id: string) => setLcdItems((prev) => prev.filter((l) => l.id !== id));
 
   // Job Handlers
   const handleAddJob = (newJob: JobOpening) => setJobOpenings((prev) => [newJob, ...prev]);
@@ -546,6 +664,9 @@ export default function App() {
       <div className="fixed inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/85 to-slate-950 pointer-events-none" />
 
       <div className="relative z-10 flex flex-col min-h-screen">
+        {/* Top Marquee Announcement Bar */}
+        <TopMarqueeBar announcements={announcements} jobOpenings={jobOpenings} />
+
         {/* Top Header Navbar */}
         <Navbar
           currentUser={currentUser}
@@ -568,6 +689,32 @@ export default function App() {
 
       {/* Main View Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'sertifikat' && (
+          <CertificateView
+            currentUser={currentUser}
+            allUsers={users}
+            onUpdateUserCertificate={handleUpdateUserCustomCert}
+          />
+        )}
+
+        {activeTab === 'modulpdf' && (
+          <PdfModulesView
+            currentUser={currentUser}
+            modules={pdfModules}
+            onAddModule={handleAddPdfModule}
+            onDeleteModule={handleDeletePdfModule}
+          />
+        )}
+
+        {activeTab === 'persamaanlcd' && (
+          <LcdCompatibilityView
+            currentUser={currentUser}
+            items={lcdItems}
+            onAddItem={handleAddLcdItem}
+            onDeleteItem={handleDeleteLcdItem}
+          />
+        )}
+
         {activeTab === 'materi' && (
           <div className="space-y-6">
             <ProgressOverview

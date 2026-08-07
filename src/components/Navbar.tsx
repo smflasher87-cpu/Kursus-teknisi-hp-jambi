@@ -19,13 +19,19 @@ import {
   Cpu,
   Sparkles,
   Download,
-  Video
+  Video,
+  Award,
+  BookOpen,
+  Smartphone
 } from 'lucide-react';
 
 export type NavTab =
   | 'materi'
   | 'analisa'
   | 'pcd'
+  | 'persamaanlcd'
+  | 'modulpdf'
+  | 'sertifikat'
   | 'chat'
   | 'pendaftaran'
   | 'profil'
@@ -63,6 +69,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const tabs = [
     { id: 'materi', label: 'Materi Pelatihan', icon: Film },
+    { id: 'modulpdf', label: 'Modul Materi PDF', icon: BookOpen },
+    { id: 'sertifikat', label: 'Download Sertifikat', icon: Award },
+    { id: 'persamaanlcd', label: 'Persamaan LCD', icon: Smartphone },
     { id: 'analisa', label: 'Analisa Kerusakan AI', icon: Cpu },
     { id: 'pcd', label: 'Part Compatible (PCD)', icon: Cpu },
     { id: 'chat', label: 'Obrolan & Chat Admin', icon: MessageCircle },
@@ -73,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'loker', label: 'Magang & Loker', icon: Briefcase },
     { id: 'freetools', label: 'Tool Software Free', icon: Download },
     { id: 'zoom', label: 'Zoom Live Meeting', icon: Video },
-    { id: 'request', label: 'Request Skematik & Tool', icon: Wrench },
+    { id: 'request', label: 'Request Skematik', icon: Wrench },
     { id: 'galeri', label: 'Foto Dokumentasi LPK', icon: Image },
     { id: 'pengumuman', label: 'Pengumuman', icon: Bell }
   ];
@@ -165,6 +174,29 @@ export const Navbar: React.FC<NavbarProps> = ({
               <LogOut className="w-4 h-4 text-red-400" />
             </button>
           </div>
+        </div>
+
+        {/* Mobile Dropdown Menu Selector for Quick Mobile Navigation */}
+        <div className="block md:hidden border-t border-slate-800/80 pt-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">
+              MENU UTAMA PORTAL:
+            </span>
+            <span className="text-[10px] font-bold text-indigo-300">
+              {tabs.find((t) => t.id === activeTab)?.label}
+            </span>
+          </div>
+          <select
+            value={activeTab}
+            onChange={(e) => onChangeTab(e.target.value as NavTab)}
+            className="w-full p-2.5 bg-slate-950 border-2 border-indigo-500/60 rounded-xl text-xs font-black text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-md"
+          >
+            {tabs.map((tab) => (
+              <option key={tab.id} value={tab.id} className="bg-slate-900 text-white font-bold py-1">
+                {tab.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Multi-row Flexible Navigation Tabs */}

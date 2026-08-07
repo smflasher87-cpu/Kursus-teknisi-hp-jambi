@@ -752,3 +752,120 @@ export const INITIAL_ZOOM_MEETINGS: ZoomMeeting[] = [
     createdAt: '2026-08-06T09:00:00Z'
   }
 ];
+
+export const INITIAL_PDF_MODULES = [
+  {
+    id: 'pdf-01',
+    title: 'Buku Panduan Dasar Hardware Teknisi HP Android & Pengukuran Avometer',
+    category: 'Android Hardware',
+    description: 'Panduan lengkap membaca hambatan dalam (diode mode), jalur VBUS, VBAT, VSYS, dan cara melacak short circuit menggunakan MBR Injection.',
+    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    fileName: 'Panduan_Dasar_Hardware_SM_Flasher.pdf',
+    fileSize: '3.4 MB',
+    uploadedBy: 'Master Budi Raharjo',
+    createdAt: '2026-08-01T08:00:00Z'
+  },
+  {
+    id: 'pdf-02',
+    title: 'SOP Reballing BGA CPU & RAM UFS Dual-Deck Step-by-Step',
+    category: 'Android Hardware',
+    description: 'Buku saku standar operasional cetak ulang kaki IC BGA (CPU Snapdragon/MediaTek + RAM) dengan timah pasta 183°C dan blower 330°C.',
+    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    fileName: 'SOP_Reballing_BGA_SM_Flasher.pdf',
+    fileSize: '5.1 MB',
+    uploadedBy: 'Rahmat Hidayat',
+    createdAt: '2026-08-02T10:30:00Z'
+  },
+  {
+    id: 'pdf-03',
+    title: 'Modul Panduan Flashing, Direct eMMC/UFS & Repair IMEI NVRAM',
+    category: 'Flashing & Software',
+    description: 'Petunjuk praktis penggantian IC eMMC/UFS, penulisan CID, backup dump, restore NVRAM, IMEI null, dan fix baseband bermasalah.',
+    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    fileName: 'Modul_Software_Direct_UFS_SMF.pdf',
+    fileSize: '8.2 MB',
+    uploadedBy: 'Andi Wijaya',
+    createdAt: '2026-08-03T11:00:00Z'
+  },
+  {
+    id: 'pdf-04',
+    title: 'Panduan Troubleshooting iPhone Hardware (Power IC, Audio IC & Baseband)',
+    category: 'iPhone Hardware',
+    description: 'Skematik panduan pengukuran tegangan BUCK & LDO pada iPhone X hingga iPhone 14 Pro Max. Mengatasi audio grayed out & no service.',
+    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    fileName: 'iPhone_Hardware_Troubleshooting_SMF.pdf',
+    fileSize: '6.7 MB',
+    uploadedBy: 'Master Syahrul Flasher',
+    createdAt: '2026-08-04T09:15:00Z'
+  }
+];
+
+export const INITIAL_LCD_COMPATIBILITY = [
+  {
+    id: 'lcd-101',
+    brand: 'Xiaomi / Poco',
+    phoneModel: 'Poco X3 Pro',
+    lcdPartCode: 'IPS 120Hz FHD+ Flex 40-Pin',
+    compatibleModels: ['Poco X3 Pro', 'Poco X3 NFC', 'Redmi Note 10 Pro (Revisi Flex A)'],
+    flexPinoutNote: 'Sama persis 100% plug and play tanpa modifikasi. Touchscreen & Refresh rate 120Hz berjalan lancar.',
+    displayTech: 'IPS LCD 120Hz',
+    addedBy: 'Instruktur Syahrul',
+    createdAt: '2026-08-01T08:00:00Z'
+  },
+  {
+    id: 'lcd-102',
+    brand: 'Oppo / Realme',
+    phoneModel: 'Oppo A53 (2020)',
+    lcdPartCode: 'IPS 90Hz HD+ Pin Flex Dual',
+    compatibleModels: ['Oppo A53 (CPH2127)', 'Oppo A33 (CPH2137)', 'Realme C17 (RMX2101)'],
+    flexPinoutNote: 'Soket flex LCD dan touchscreen identik. Presisi frame dan kecerahan lampu backlight sama.',
+    displayTech: 'IPS LCD 90Hz',
+    addedBy: 'Admin LPK SM Flasher',
+    createdAt: '2026-08-02T09:00:00Z'
+  },
+  {
+    id: 'lcd-103',
+    brand: 'Samsung',
+    phoneModel: 'Samsung Galaxy A12',
+    lcdPartCode: 'PLS LCD HD+ Flex A125',
+    compatibleModels: ['Samsung Galaxy A12 (SM-A125F)', 'Samsung Galaxy A12 Nacho (SM-A127F)', 'Samsung Galaxy M12 (SM-M127F)'],
+    flexPinoutNote: 'Keduanya dapat dipasang teringat IC driver display sama. Perhatikan revisi kaca kamera depan.',
+    displayTech: 'PLS LCD',
+    addedBy: 'Teknisi Rahmat',
+    createdAt: '2026-08-03T10:00:00Z'
+  },
+  {
+    id: 'lcd-104',
+    brand: 'Vivo',
+    phoneModel: 'Vivo Y20',
+    lcdPartCode: 'IPS HD+ Halo FullView',
+    compatibleModels: ['Vivo Y20', 'Vivo Y20s', 'Vivo Y20i', 'Vivo Y12s', 'Vivo Y15s (2021)', 'Vivo Y20 2021'],
+    flexPinoutNote: 'Universal 1 seri Vivo Y-series 2020-2022. Pastikan rapat di frame samping agar tidak renggang.',
+    displayTech: 'IPS LCD',
+    addedBy: 'Admin LPK SM Flasher',
+    createdAt: '2026-08-04T14:00:00Z'
+  },
+  {
+    id: 'lcd-105',
+    brand: 'Infinix / Tecno',
+    phoneModel: 'Infinix Hot 10 Play',
+    lcdPartCode: 'IPS HD+ Pin Flex X688',
+    compatibleModels: ['Infinix Hot 10 Play (X688B)', 'Infinix Smart 5 (X657)', 'Tecno Spark 6 Go (KE5)'],
+    flexPinoutNote: 'Soket flex sama persis. Gambar jernih tanpa cacat garis.',
+    displayTech: 'IPS LCD',
+    addedBy: 'Andi Wijaya',
+    createdAt: '2026-08-05T12:00:00Z'
+  },
+  {
+    id: 'lcd-106',
+    brand: 'iPhone',
+    phoneModel: 'iPhone 11',
+    lcdPartCode: 'Liquid Retina HD Flex Dual 3D-Touch',
+    compatibleModels: ['iPhone 11 (A2111, A2221, A2223)'],
+    flexPinoutNote: 'Khusus iPhone 11. Untuk menghilangkan notifikasi "Important Display Message", pindahkan IC Eprom EEPROM dari LCD original lama ke LCD baru.',
+    displayTech: 'Liquid Retina IPS',
+    addedBy: 'Master Syahrul Flasher',
+    createdAt: '2026-08-06T15:00:00Z'
+  }
+];
+

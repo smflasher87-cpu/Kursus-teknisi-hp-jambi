@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
+import { playAiDiagnosticSound, speakAiAnalysisResult } from '../utils/audio';
 import {
   Cpu,
   Zap,
@@ -105,6 +106,8 @@ export const AiDamageAnalysisView: React.FC<AiDamageAnalysisViewProps> = ({
         if (data && data.verdict) {
           setResult(data);
           setIsLoading(false);
+          playAiDiagnosticSound();
+          speakAiAnalysisResult();
           return;
         }
       }
@@ -249,6 +252,8 @@ export const AiDamageAnalysisView: React.FC<AiDamageAnalysisViewProps> = ({
         confidenceScore: 94
       });
       setIsLoading(false);
+      playAiDiagnosticSound();
+      speakAiAnalysisResult();
     }, 1200);
   };
 

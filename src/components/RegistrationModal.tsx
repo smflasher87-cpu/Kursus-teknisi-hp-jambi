@@ -302,11 +302,18 @@ _Halo Admin LPK SM Flasher, saya telah mengisi formulir pendaftaran dan mengungg
               </div>
             </div>
 
-            {/* Class Program Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                Pilih Program Kelas Pelatihan (Klik Salah Satu) *
-              </label>
+            {/* Class Program Selector - Mobile & Desktop Optimized */}
+            <div className="space-y-3 bg-slate-950 p-4 sm:p-5 rounded-2xl border border-indigo-500/30 shadow-inner">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <label className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
+                  <Award className="w-4 h-4 text-amber-400" />
+                  <span>PILIH PROGRAM KELAS PELATIHAN (KLIK SALAH SATU) *</span>
+                </label>
+                <span className="text-[10px] font-extrabold bg-indigo-600 text-white px-2 py-0.5 rounded uppercase shadow">
+                  WAJIB DIPILIH
+                </span>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {classOptions.map((c) => {
                   const isSelected = selectedClassKey === c.key;
@@ -314,25 +321,35 @@ _Halo Admin LPK SM Flasher, saya telah mengisi formulir pendaftaran dan mengungg
                     <div
                       key={c.key}
                       onClick={() => setSelectedClassKey(c.key as any)}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                         isSelected
-                          ? 'bg-indigo-950/90 border-indigo-500 ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/20'
-                          : 'bg-slate-950 border-slate-800 hover:border-slate-700 hover:bg-slate-900/50'
+                          ? 'bg-gradient-to-r from-indigo-950 to-slate-900 border-indigo-400 ring-2 ring-indigo-500/60 shadow-xl shadow-indigo-500/20'
+                          : 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-850'
                       }`}
                     >
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         <div className="flex items-center space-x-2">
-                          <p className="text-xs font-bold text-white">{c.name}</p>
-                          {isSelected && (
-                            <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">
-                              Dipilih
+                          <span className={`text-xs font-black ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+                            {c.name}
+                          </span>
+                          {isSelected ? (
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 shadow-sm border border-emerald-400">
+                              TERPILIH ✓
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                              Opsi Kelas
                             </span>
                           )}
                         </div>
-                        <p className="text-sm font-extrabold text-indigo-400">{c.label}</p>
+                        <p className="text-sm font-black text-indigo-400 flex items-center space-x-1">
+                          <span>Biaya: {c.label}</span>
+                        </p>
                       </div>
-                      <div className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-slate-700 bg-slate-900'}`}>
-                        {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition ${
+                        isSelected ? 'border-emerald-400 bg-emerald-500 text-slate-950 shadow-md' : 'border-slate-600 bg-slate-950'
+                      }`}>
+                        {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
                       </div>
                     </div>
                   );
@@ -544,8 +561,37 @@ _Halo Admin LPK SM Flasher, saya telah mengisi formulir pendaftaran dan mengungg
               </div>
             </div>
 
+            {/* Summary Payment Box directly above Submit Button */}
+            <div className="p-4 bg-gradient-to-r from-emerald-950/80 via-slate-900 to-indigo-950/80 border border-emerald-500/40 rounded-xl space-y-3 shadow-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-500/20 pb-2.5">
+                <div>
+                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block">
+                    TOTAL NOMINAL PEMBAYARAN KELAS
+                  </span>
+                  <div className="text-xl font-black text-white flex items-center space-x-2">
+                    <span className="text-emerald-400">Rp {currentClassObj.fee.toLocaleString('id-ID')}</span>
+                    <span className="text-xs font-bold text-slate-300">({currentClassObj.name})</span>
+                  </div>
+                </div>
+                <div className="text-left sm:text-right bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                  <span className="text-[10px] text-slate-400 block">Transfer Ke Rekening Resmi:</span>
+                  <p className="text-xs font-bold text-white">
+                    {adminSettings.bankName}: <span className="text-indigo-300 font-mono font-extrabold">{adminSettings.bankAccountNumber}</span>
+                  </p>
+                  <p className="text-[10px] text-slate-300">a.n {adminSettings.bankAccountName}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 text-[11px] text-emerald-300 bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/50">
+                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  <strong>Verifikasi Nominal:</strong> Bukti transfer yang Anda unggah harus sesuai dengan nominal <strong>Rp {currentClassObj.fee.toLocaleString('id-ID')}</strong> untuk proses verifikasi instan oleh Admin.
+                </span>
+              </div>
+            </div>
+
             {/* Submit Button */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={onClose}
@@ -555,7 +601,7 @@ _Halo Admin LPK SM Flasher, saya telah mengisi formulir pendaftaran dan mengungg
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-500/20 transition flex items-center space-x-2"
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center space-x-2"
               >
                 <Send className="w-4 h-4" />
                 <span>Kirim Pendaftaran via WhatsApp Admin</span>

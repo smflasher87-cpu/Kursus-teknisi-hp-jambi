@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, ChatMessage } from '../types';
+import { playChatNotificationSound, playCallRingtoneSound } from '../utils/audio';
 import {
   Send,
   Paperclip,
@@ -73,6 +74,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const callTimerRef = useRef<any>(null);
 
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
+  const prevMsgCountRef = useRef(messages.length);
+
+  // Sound notification on incoming messages from others
+  useEffect(() => {
+    if (messages.length > prevMsgCountRef.current) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg && lastMsg.senderId !== currentUser.id) {
+        playChatNotificationSound();
+      }
+    }
+    prevMsgCountRef.current = messages.length;
+  }, [messages, currentUser.id]);
 
   // Auto scroll to bottom when messages change or channel changes
   useEffect(() => {
@@ -108,6 +121,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
     onSendMessage(newMsg);
     setTextInput('');
+    playChatNotificationSound();
   };
 
   // Handle File / Image Upload
@@ -134,6 +148,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
         createdAt: new Date().toISOString()
       };
       onSendMessage(newMsg);
+      playChatNotificationSound();
     };
 
     reader.readAsDataURL(file);
@@ -172,6 +187,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             createdAt: new Date().toISOString()
           };
           onSendMessage(newMsg);
+          playChatNotificationSound();
         };
         reader.readAsDataURL(audioBlob);
 
@@ -258,6 +274,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
       isVideoOff: false,
       callSeconds: 0
     });
+
+    playCallRingtoneSound();
 
     // Request Media Camera/Microphone stream
     try {

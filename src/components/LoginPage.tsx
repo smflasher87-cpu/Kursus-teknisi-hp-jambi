@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
+import { speakLoginSuccess, speakLoginFailed } from '../utils/audio';
 import { ShieldCheck, Lock, User as UserIcon, Eye, EyeOff, AlertCircle, Wrench, GraduationCap, UserPlus, CheckCircle2, Key } from 'lucide-react';
 import bgImage from '../assets/images/smflasher_bg_1786027934305.jpg';
 
@@ -59,6 +60,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onO
         setErrorMessage(
           'Username atau password tidak ditemukan / salah. Pastikan akun Anda telah terdaftar oleh Admin LPK SM FLASHER.'
         );
+        speakLoginFailed();
         setIsLoading(false);
         return;
       }
@@ -67,6 +69,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onO
         setErrorMessage(
           'Akun Anda saat ini dinonaktifkan oleh Admin. Silakan hubungi instruktur LPK SM FLASHER.'
         );
+        speakLoginFailed();
         setIsLoading(false);
         return;
       }
@@ -82,6 +85,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onO
         localStorage.removeItem('sm_flasher_remember_password');
       }
 
+      speakLoginSuccess();
       setIsLoading(false);
       onLoginSuccess(foundUser);
     }, 400);

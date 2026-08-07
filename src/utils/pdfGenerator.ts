@@ -117,3 +117,117 @@ export function generateModulePDF(video: Video) {
 
   doc.save(fileName);
 }
+
+export function generateCertificatePDF(
+  studentName: string,
+  classProgram: string,
+  certNumber: string,
+  issueDate: string,
+  bnspNumber?: string
+) {
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  // Background Outer Frame
+  doc.setFillColor(15, 23, 42); // Slate 900
+  doc.rect(0, 0, 297, 210, 'F');
+
+  // Gold Inner Frame
+  doc.setLineWidth(1.5);
+  doc.setDrawColor(217, 119, 6); // Amber 600
+  doc.roundedRect(8, 8, 281, 194, 4, 4, 'D');
+
+  doc.setLineWidth(0.5);
+  doc.setDrawColor(245, 158, 11); // Amber 500
+  doc.roundedRect(12, 12, 273, 186, 3, 3, 'D');
+
+  // Certificate Header Card Area
+  doc.setFillColor(30, 41, 59); // Slate 800
+  doc.roundedRect(16, 16, 265, 178, 2, 2, 'F');
+
+  // Header Title
+  doc.setTextColor(245, 158, 11);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text('LPK SM FLASHER TRAINING CENTRE', 148.5, 36, { align: 'center' });
+
+  doc.setTextColor(226, 232, 240);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text('LEMBAGA PELATIHAN KERJA TEKNISI TELEPON SELULER PROFESIONAL', 148.5, 43, { align: 'center' });
+  doc.text('SK KEMENKUMHAM: AHU-0012345.AH.01.04 | VIN KEMNAKER: 2109317101', 148.5, 48, { align: 'center' });
+
+  // Divider Line
+  doc.setDrawColor(245, 158, 11);
+  doc.setLineWidth(0.8);
+  doc.line(40, 53, 257, 53);
+
+  // Main Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(28);
+  doc.text('SERTIFIKAT KELULUSAN', 148.5, 68, { align: 'center' });
+
+  doc.setTextColor(203, 213, 225);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.text(`NO. REGISTRASI: ${certNumber}`, 148.5, 76, { align: 'center' });
+
+  doc.setFontSize(12);
+  doc.text('Diberikan dengan hormat kepada:', 148.5, 90, { align: 'center' });
+
+  // Student Name
+  doc.setTextColor(245, 158, 11);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(26);
+  doc.text(studentName.toUpperCase(), 148.5, 105, { align: 'center' });
+
+  // Name Underline
+  doc.setDrawColor(245, 158, 11);
+  doc.setLineWidth(0.5);
+  doc.line(80, 108, 217, 108);
+
+  // Completion Statement
+  doc.setTextColor(226, 232, 240);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
+  doc.text(
+    `Telah menyelesaikan dengan BAIK DAN LULUS seluruh rangkaian Ujian Praktek & Teori pada Program Pelatihan:`,
+    148.5,
+    120,
+    { align: 'center' }
+  );
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text(classProgram.toUpperCase(), 148.5, 130, { align: 'center' });
+
+  if (bnspNumber) {
+    doc.setTextColor(148, 163, 184);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Sertifikasi Kompetensi Terdaftar BNSP: ${bnspNumber}`, 148.5, 138, { align: 'center' });
+  }
+
+  // Signatures Row
+  doc.setTextColor(203, 213, 225);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Jambi, ${issueDate}`, 215, 155, { align: 'center' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Head Master Instructor', 65, 162, { align: 'center' });
+  doc.text('Direktur LPK SM Flasher', 215, 162, { align: 'center' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(245, 158, 11);
+  doc.text('Master Syahrul Flasher', 65, 182, { align: 'center' });
+  doc.text('Pimpinan LPK SM Flasher', 215, 182, { align: 'center' });
+
+  doc.save(`Sertifikat_${studentName.replace(/\s+/g, '_')}_${certNumber}.pdf`);
+}
+

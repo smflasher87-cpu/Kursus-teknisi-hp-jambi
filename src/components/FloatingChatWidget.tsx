@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, ChatMessage } from '../types';
+import { playChatNotificationSound } from '../utils/audio';
 import {
   MessageSquare,
   X,
@@ -85,6 +86,7 @@ export const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
 
     onSendMessage(newMsg);
     setTextInput('');
+    playChatNotificationSound();
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,6 +112,7 @@ export const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
         createdAt: new Date().toISOString()
       };
       onSendMessage(newMsg);
+      playChatNotificationSound();
     };
 
     reader.readAsDataURL(file);
@@ -146,6 +149,7 @@ export const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
             createdAt: new Date().toISOString()
           };
           onSendMessage(newMsg);
+          playChatNotificationSound();
         };
         reader.readAsDataURL(audioBlob);
         stream.getTracks().forEach((track) => track.stop());

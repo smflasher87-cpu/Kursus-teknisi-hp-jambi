@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Video } from '../types';
 import { X, Film, Plus, Trash2, Edit3, FileText, CheckCircle2, Upload, HardDrive, Play, Link } from 'lucide-react';
 import { renderVideoElement } from '../utils/videoUtils';
+import { uploadFileToDrive, getDriveAccessToken } from '../utils/googleDrive';
 
 interface AdminVideoModalProps {
   videos: Video[];
@@ -81,7 +82,7 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
     setNotification('');
   };
 
-  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -94,10 +95,23 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
     setUploadedFileName(file.name);
     setUploadedFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
 
+    const driveToken = getDriveAccessToken();
+    if (driveToken) {
+      try {
+        const driveRes = await uploadFileToDrive(driveToken, file, file.name, file.type);
+        setVideoUrl(driveRes.webViewLink);
+        setNotification('File video berhasil diunggah langsung ke Google Drive!');
+      } catch (err) {
+        console.warn('Direct drive upload failed, falling back to local data URL:', err);
+      }
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       const result = reader.result as string;
-      setVideoUrl(result);
+      if (!getDriveAccessToken()) {
+        setVideoUrl(result);
+      }
       setIsUploading(false);
 
       if (!title.trim()) {

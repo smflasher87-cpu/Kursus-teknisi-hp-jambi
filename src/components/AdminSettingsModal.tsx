@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminSettings, User } from '../types';
-import { Settings, X, Save, Image, Phone, CreditCard, DollarSign, Award, Check } from 'lucide-react';
+import { Settings, X, Save, Image, Phone, CreditCard, DollarSign, Award, Check, HardDrive, RefreshCw } from 'lucide-react';
+import { signInWithGoogleDrive, getDriveAccessToken, TARGET_GOOGLE_DRIVE_ACCOUNT, backupStateToDrive } from '../utils/googleDrive';
 
 interface AdminSettingsModalProps {
   settings: AdminSettings;
@@ -21,6 +22,35 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({
   const [selectedStudentId, setSelectedStudentId] = useState<string>(users.find((u) => u.role === 'siswa')?.id || '');
   const [customCertUrl, setCustomCertUrl] = useState<string>('');
   const [certSavedSuccess, setCertSavedSuccess] = useState(false);
+  const [isDriveConnected, setIsDriveConnected] = useState(!!getDriveAccessToken());
+  const [isSyncingDrive, setIsSyncingDrive] = useState(false);
+  const [driveSyncMessage, setDriveSyncMessage] = useState('');
+
+  useEffect(() => {
+    setIsDriveConnected(!!getDriveAccessToken());
+  }, []);
+
+  const handleConnectGoogleDrive = async () => {
+    try {
+      setIsSyncingDrive(true);
+      const res = await signInWithGoogleDrive();
+      if (res && res.accessToken) {
+        setIsDriveConnected(true);
+        setDriveSyncMessage('Terhubung dengan Google Drive (' + TARGET_GOOGLE_DRIVE_ACCOUNT + ')!');
+        // Trigger initial backup
+        await backupStateToDrive(res.accessToken, {
+          users,
+          settings,
+          timestamp: new Date().toISOString()
+        });
+        setDriveSyncMessage('Database & Media Berhasil Disinkronkan ke Google Drive!');
+      }
+    } catch (err: any) {
+      setDriveSyncMessage('Gagal terhubung ke Google Drive: ' + err.message);
+    } finally {
+      setIsSyncingDrive(false);
+    }
+  };
 
   const handleSaveMainSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,6 +320,59 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+        {/* Section 5: Google Drive Cloud Sync */}
+        <div className="pt-6 border-t border-slate-800 mt-6 space-y-3">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-1.5">
+            <HardDrive className="w-4 h-4 text-emerald-400" />
+            <span>Integrasi Storage Online & Cloud Google Drive</span>
+          </h4>
+
+          <div className="p-4 bg-slate-950 rounded-xl border border-emerald-500/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-white flex items-center space-x-2">
+                  <span>Akun Target:</span>
+                  <span className="text-emerald-400 font-mono bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                    {TARGET_GOOGLE_DRIVE_ACCOUNT}
+                  </span>
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Sinkronisasi otomatis file video materi, PDF modul, foto galeri, dan backup user login secara online.
+                </p>
+              </div>
+
+              <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
+                isDriveConnected
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+              }`}>
+                {isDriveConnected ? 'TERHUBUNG ✓' : 'BELUM SINKRON'}
+              </span>
+            </div>
+
+            {driveSyncMessage && (
+              <p className="text-xs font-bold text-amber-300 bg-amber-950/40 p-2 rounded-lg border border-amber-500/30">
+                {driveSyncMessage}
+              </p>
+            )}
+
+            <div className="pt-1 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">
+                Status: {isDriveConnected ? 'File & Data tersimpan online di Google Drive' : 'Klik tombol di samping untuk login Google Drive'}
+              </span>
+
+              <button
+                type="button"
+                onClick={handleConnectGoogleDrive}
+                disabled={isSyncingDrive}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center space-x-2 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncingDrive ? 'animate-spin' : ''}`} />
+                <span>{isSyncingDrive ? 'Menghubungkan...' : 'Sinkronkan Google Drive'}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
