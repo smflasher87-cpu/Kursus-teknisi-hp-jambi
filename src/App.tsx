@@ -39,6 +39,7 @@ import { VideoCard } from './components/VideoCard';
 import { VideoPlayerModal } from './components/VideoPlayerModal';
 import { AdminUserModal } from './components/AdminUserModal';
 import { AdminVideoModal } from './components/AdminVideoModal';
+import { AdminCategoryModal } from './components/AdminCategoryModal';
 import { TechnicianToolbox } from './components/TechnicianToolbox';
 import { CertificateModal } from './components/CertificateModal';
 
@@ -62,9 +63,29 @@ import bgImage from './assets/images/smflasher_bg_1786027934305.jpg';
 
 import { Search, Film, AlertCircle, Wrench, ShieldCheck, UserCheck, Plus, CheckCircle2 } from 'lucide-react';
 
+const DEFAULT_CATEGORIES = [
+  'Dasar Hardware',
+  'Trik Jumper & Skematik',
+  'IC Power & Charging',
+  'Pengukuran Multimeter',
+  'Perbaikan Software & Flashing',
+  'eMMC & UFS Programming',
+  'Sinyal & RF IC',
+  'iPhone Hardware Special'
+];
+
 export default function App() {
   // Navigation active tab
   const [activeTab, setActiveTab] = useState<NavTab>('materi');
+
+  // Categories State
+  const [categories, setCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('sm_flasher_categories');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return DEFAULT_CATEGORIES;
+  });
 
   // Users
   const [users, setUsers] = useState<User[]>(() => {
@@ -231,36 +252,75 @@ export default function App() {
   // Modals
   const [isAdminUsersOpen, setIsAdminUsersOpen] = useState(false);
   const [isAdminVideosOpen, setIsAdminVideosOpen] = useState(false);
+  const [isAdminCategoriesOpen, setIsAdminCategoriesOpen] = useState(false);
   const [isAdminSettingsOpen, setIsAdminSettingsOpen] = useState(false);
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isToolRequestModalOpen, setIsToolRequestModalOpen] = useState(false);
 
   // Sync state to LocalStorage
-  useEffect(() => { localStorage.setItem('sm_flasher_users', JSON.stringify(users)); }, [users]);
-  useEffect(() => { localStorage.setItem('sm_flasher_videos', JSON.stringify(videos)); }, [videos]);
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('sm_flasher_current_user', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('sm_flasher_current_user');
-    }
+    try { localStorage.setItem('sm_flasher_users', JSON.stringify(users)); } catch (e) { console.warn('LocalStorage Quota:', e); }
+  }, [users]);
+
+  useEffect(() => {
+    try { localStorage.setItem('sm_flasher_videos', JSON.stringify(videos)); } catch (e) { console.warn('LocalStorage Quota:', e); }
+  }, [videos]);
+
+  useEffect(() => {
+    try { localStorage.setItem('sm_flasher_categories', JSON.stringify(categories)); } catch (e) { console.warn('LocalStorage Quota:', e); }
+  }, [categories]);
+
+  useEffect(() => {
+    try {
+      if (currentUser) {
+        localStorage.setItem('sm_flasher_current_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('sm_flasher_current_user');
+      }
+    } catch (e) { console.warn('LocalStorage Quota:', e); }
   }, [currentUser]);
 
-  useEffect(() => { localStorage.setItem('sm_flasher_admin_settings', JSON.stringify(adminSettings)); }, [adminSettings]);
-  useEffect(() => { localStorage.setItem('sm_flasher_institution_profile', JSON.stringify(institutionProfile)); }, [institutionProfile]);
-  useEffect(() => { localStorage.setItem('sm_flasher_registrations', JSON.stringify(registrations)); }, [registrations]);
-  useEffect(() => { localStorage.setItem('sm_flasher_alumni', JSON.stringify(alumniList)); }, [alumniList]);
-  useEffect(() => { localStorage.setItem('sm_flasher_cases', JSON.stringify(casePosts)); }, [casePosts]);
-  useEffect(() => { localStorage.setItem('sm_flasher_jobs', JSON.stringify(jobOpenings)); }, [jobOpenings]);
-  useEffect(() => { localStorage.setItem('sm_flasher_gallery', JSON.stringify(galleryItems)); }, [galleryItems]);
-  useEffect(() => { localStorage.setItem('sm_flasher_announcements', JSON.stringify(announcements)); }, [announcements]);
-  useEffect(() => { localStorage.setItem('sm_flasher_chat_messages', JSON.stringify(chatMessages)); }, [chatMessages]);
-  useEffect(() => { localStorage.setItem('sm_flasher_pcd_items', JSON.stringify(pcdItems)); }, [pcdItems]);
-  useEffect(() => { localStorage.setItem('sm_flasher_free_tools', JSON.stringify(freeTools)); }, [freeTools]);
-  useEffect(() => { localStorage.setItem('sm_flasher_zoom_meetings', JSON.stringify(zoomMeetings)); }, [zoomMeetings]);
-  useEffect(() => { localStorage.setItem('sm_flasher_completed_map', JSON.stringify(completedMap)); }, [completedMap]);
-  useEffect(() => { localStorage.setItem('sm_flasher_notes_map', JSON.stringify(notesMap)); }, [notesMap]);
+  // Real-time Storage Sync across windows/tabs
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (!e.key || e.newValue === null) return;
+      try {
+        const data = JSON.parse(e.newValue);
+        if (e.key === 'sm_flasher_users') setUsers(data);
+        if (e.key === 'sm_flasher_videos') setVideos(data);
+        if (e.key === 'sm_flasher_categories') setCategories(data);
+        if (e.key === 'sm_flasher_cases') setCasePosts(data);
+        if (e.key === 'sm_flasher_jobs') setJobOpenings(data);
+        if (e.key === 'sm_flasher_gallery') setGalleryItems(data);
+        if (e.key === 'sm_flasher_announcements') setAnnouncements(data);
+        if (e.key === 'sm_flasher_chat_messages') setChatMessages(data);
+        if (e.key === 'sm_flasher_free_tools') setFreeTools(data);
+        if (e.key === 'sm_flasher_zoom_meetings') setZoomMeetings(data);
+        if (e.key === 'sm_flasher_completed_map') setCompletedMap(data);
+      } catch (err) {
+        console.error('Storage sync error:', err);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => { try { localStorage.setItem('sm_flasher_admin_settings', JSON.stringify(adminSettings)); } catch (e) {} }, [adminSettings]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_institution_profile', JSON.stringify(institutionProfile)); } catch (e) {} }, [institutionProfile]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_registrations', JSON.stringify(registrations)); } catch (e) {} }, [registrations]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_alumni', JSON.stringify(alumniList)); } catch (e) {} }, [alumniList]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_cases', JSON.stringify(casePosts)); } catch (e) {} }, [casePosts]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_jobs', JSON.stringify(jobOpenings)); } catch (e) {} }, [jobOpenings]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_gallery', JSON.stringify(galleryItems)); } catch (e) {} }, [galleryItems]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_announcements', JSON.stringify(announcements)); } catch (e) {} }, [announcements]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_chat_messages', JSON.stringify(chatMessages)); } catch (e) {} }, [chatMessages]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_pcd_items', JSON.stringify(pcdItems)); } catch (e) {} }, [pcdItems]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_free_tools', JSON.stringify(freeTools)); } catch (e) {} }, [freeTools]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_zoom_meetings', JSON.stringify(zoomMeetings)); } catch (e) {} }, [zoomMeetings]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_completed_map', JSON.stringify(completedMap)); } catch (e) {} }, [completedMap]);
+  useEffect(() => { try { localStorage.setItem('sm_flasher_notes_map', JSON.stringify(notesMap)); } catch (e) {} }, [notesMap]);
 
   // Job Handlers
   const handleAddJob = (newJob: JobOpening) => setJobOpenings((prev) => [newJob, ...prev]);
@@ -327,9 +387,36 @@ export default function App() {
     setAlumniList((prev) => prev.filter((a) => a.id !== id));
   };
 
+  // Category Handlers
+  const handleAddCategory = (newCat: string) => {
+    setCategories((prev) => [...prev, newCat]);
+  };
+
+  const handleEditCategory = (oldCat: string, newCat: string) => {
+    setCategories((prev) => prev.map((c) => (c === oldCat ? newCat : c)));
+    setVideos((prev) =>
+      prev.map((v) => (v.category === oldCat ? { ...v, category: newCat } : v))
+    );
+  };
+
+  const handleDeleteCategory = (catToDelete: string) => {
+    setCategories((prev) => prev.filter((c) => c !== catToDelete));
+    setVideos((prev) =>
+      prev.map((v) => (v.category === catToDelete ? { ...v, category: 'Dasar Hardware' } : v))
+    );
+  };
+
   // Case Posts Handlers
   const handleAddCasePost = (post: CasePost) => {
     setCasePosts((prev) => [post, ...prev]);
+  };
+
+  const handleEditCasePost = (updatedPost: CasePost) => {
+    setCasePosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
+  };
+
+  const handleDeleteCasePost = (postId: string) => {
+    setCasePosts((prev) => prev.filter((p) => p.id !== postId));
   };
 
   const handleAddCommentToPost = (postId: string, text: string) => {
@@ -489,6 +576,9 @@ export default function App() {
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
               onOpenCertificate={() => setIsCertificateOpen(true)}
+              allCategories={categories}
+              isAdmin={currentUser?.role === 'admin'}
+              onManageCategories={() => setIsAdminCategoriesOpen(true)}
             />
 
             <TechnicianToolbox />
@@ -621,6 +711,8 @@ export default function App() {
             casePosts={casePosts}
             currentUser={currentUser}
             onAddPost={handleAddCasePost}
+            onEditPost={handleEditCasePost}
+            onDeletePost={handleDeleteCasePost}
             onAddComment={handleAddCommentToPost}
             onToggleLike={handleToggleLikePost}
           />
@@ -744,6 +836,16 @@ export default function App() {
           onUpdateVideo={handleUpdateVideo}
           onDeleteVideo={handleDeleteVideo}
           onClose={() => setIsAdminVideosOpen(false)}
+        />
+      )}
+
+      {isAdminCategoriesOpen && currentUser.role === 'admin' && (
+        <AdminCategoryModal
+          categories={categories}
+          onAddCategory={handleAddCategory}
+          onEditCategory={handleEditCategory}
+          onDeleteCategory={handleDeleteCategory}
+          onClose={() => setIsAdminCategoriesOpen(false)}
         />
       )}
 

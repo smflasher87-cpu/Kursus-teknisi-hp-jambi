@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Video } from '../types';
 import { generateModulePDF } from '../utils/pdfGenerator';
+import { renderVideoElement } from '../utils/videoUtils';
 import {
   X,
   CheckCircle2,
@@ -128,18 +129,9 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
         <div className="p-5 overflow-y-auto flex-1">
           {activeTab === 'video' && (
             <div className="space-y-5">
-              {/* HTML5 Video Player */}
+              {/* Universal Video Player (Supports MP4, Data URLs, YouTube, Google Drive) */}
               <div className="relative aspect-video bg-black rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
-                <video
-                  key={video.id}
-                  controls
-                  controlsList="nodownload"
-                  className="w-full h-full object-contain"
-                  poster=""
-                >
-                  <source src={video.videoUrl} type="video/mp4" />
-                  Browser Anda tidak mendukung pemutar video HTML5.
-                </video>
+                {renderVideoElement(video.videoUrl, video.title)}
               </div>
 
               {/* Video Info Details */}

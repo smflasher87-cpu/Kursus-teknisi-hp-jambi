@@ -1,6 +1,6 @@
 import React from 'react';
 import { Video } from '../types';
-import { Award, CheckCircle2, Film, Layers, Sparkles } from 'lucide-react';
+import { Award, CheckCircle2, Film, Layers, Sparkles, Tag, Plus } from 'lucide-react';
 
 interface ProgressOverviewProps {
   videos: Video[];
@@ -8,6 +8,9 @@ interface ProgressOverviewProps {
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
   onOpenCertificate?: () => void;
+  allCategories?: string[];
+  isAdmin?: boolean;
+  onManageCategories?: () => void;
 }
 
 export const ProgressOverview: React.FC<ProgressOverviewProps> = ({
@@ -15,7 +18,10 @@ export const ProgressOverview: React.FC<ProgressOverviewProps> = ({
   completedVideoIds,
   selectedCategory,
   onSelectCategory,
-  onOpenCertificate
+  onOpenCertificate,
+  allCategories,
+  isAdmin,
+  onManageCategories
 }) => {
   const totalVideos = videos.length;
   const completedCount = completedVideoIds.length;
@@ -23,7 +29,7 @@ export const ProgressOverview: React.FC<ProgressOverviewProps> = ({
 
   const categories = [
     'Semua Video',
-    ...Array.from(new Set(videos.map((v) => v.category)))
+    ...(allCategories || Array.from(new Set(videos.map((v) => v.category))))
   ];
 
   return (
@@ -94,6 +100,18 @@ export const ProgressOverview: React.FC<ProgressOverviewProps> = ({
           <Layers className="w-4 h-4 text-indigo-400" />
           <span>Kategori:</span>
         </div>
+
+        {isAdmin && onManageCategories && (
+          <button
+            onClick={onManageCategories}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/40 shrink-0 flex items-center space-x-1 transition mr-1"
+            title="Kelola, Tambah, Edit, dan Hapus Kategori Materi (Admin)"
+          >
+            <Tag className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Kelola Kategori (Admin)</span>
+          </button>
+        )}
+
         {categories.map((cat) => {
           const isSelected = selectedCategory === cat;
           const count =

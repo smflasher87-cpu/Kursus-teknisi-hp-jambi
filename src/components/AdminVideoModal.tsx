@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Video } from '../types';
 import { X, Film, Plus, Trash2, Edit3, FileText, CheckCircle2, Upload, HardDrive, Play, Link } from 'lucide-react';
+import { renderVideoElement } from '../utils/videoUtils';
 
 interface AdminVideoModalProps {
   videos: Video[];
@@ -372,7 +373,7 @@ export const AdminVideoModal: React.FC<AdminVideoModalProps> = ({
                     </div>
 
                     <div className="relative aspect-video bg-black rounded-lg overflow-hidden border border-slate-800">
-                      <video src={videoUrl} controls className="w-full h-full object-contain" />
+                      {renderVideoElement(videoUrl, title)}
                     </div>
                   </div>
                 )}

@@ -137,9 +137,71 @@ export const LoginPage: React.FC<LoginPageProps> = ({ users, onLoginSuccess, onO
               Akses Eksklusif <br />
               <span className="text-indigo-400 italic">Video Materi Digital.</span>
             </h1>
-            <p className="text-slate-400 text-sm sm:text-base max-w-md leading-relaxed">
+            <p className="text-slate-400 text-sm sm:text-base max-w-md leading-relaxed mb-6">
               Platform pembelajaran teknisi telepon seluler (Android & iPhone) tertutup. Seluruh materi video dan kurikulum skematik hanya dapat diakses melalui akun resmi yang telah didaftarkan.
             </p>
+
+            {/* Official Accreditation & Legal Logos Section */}
+            <div className="space-y-2.5 bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400 block">
+                AKREDITASI & LEGALITAS RESMI LEMBAGA
+              </span>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                {/* 1. KEMNAKER */}
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500/50 transition group">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-[10px] flex items-center justify-center border border-emerald-500/40 mb-1 group-hover:scale-105 transition">
+                    K3
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-200 text-center leading-tight">KEMNAKER</span>
+                  <span className="text-[7px] text-slate-400 text-center">VIN Terdaftar</span>
+                </div>
+
+                {/* 2. SM FLASHER */}
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-indigo-950/60 border border-indigo-500/40 hover:border-indigo-400 transition group">
+                  <div className="w-8 h-8 rounded-full bg-indigo-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md mb-1 group-hover:scale-105 transition">
+                    SM
+                  </div>
+                  <span className="text-[9px] font-bold text-indigo-300 text-center leading-tight">SM FLASHER</span>
+                  <span className="text-[7px] text-indigo-400 text-center">Training Centre</span>
+                </div>
+
+                {/* 3. KEMENKUMHAM */}
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500/50 transition group">
+                  <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 font-black text-[10px] flex items-center justify-center border border-amber-500/40 mb-1 group-hover:scale-105 transition">
+                    AHU
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-200 text-center leading-tight">KEMENKUMHAM</span>
+                  <span className="text-[7px] text-slate-400 text-center">Badan Hukum</span>
+                </div>
+
+                {/* 4. OSS */}
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500/50 transition group">
+                  <div className="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 font-black text-[10px] flex items-center justify-center border border-sky-500/40 mb-1 group-hover:scale-105 transition">
+                    NIB
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-200 text-center leading-tight">OSS RBA</span>
+                  <span className="text-[7px] text-slate-400 text-center">BKPM RI</span>
+                </div>
+
+                {/* 5. BNSP */}
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500/50 transition group">
+                  <div className="w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-black text-[10px] flex items-center justify-center border border-red-500/40 mb-1 group-hover:scale-105 transition">
+                    LSP
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-200 text-center leading-tight">BNSP</span>
+                  <span className="text-[7px] text-slate-400 text-center">Sertifikasi</span>
+                </div>
+
+                {/* 6. SIAP KERJA */}
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500/50 transition group">
+                  <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 font-black text-[10px] flex items-center justify-center border border-indigo-500/40 mb-1 group-hover:scale-105 transition">
+                    SK
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-200 text-center leading-tight">SIAP KERJA</span>
+                  <span className="text-[7px] text-slate-400 text-center">Karir Ketenagakerjaan</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="relative z-10 grid grid-cols-2 gap-6 sm:gap-8 border-t border-slate-800 pt-8 mt-8 lg:mt-12">
