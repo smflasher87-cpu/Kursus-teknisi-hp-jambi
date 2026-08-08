@@ -33,6 +33,7 @@ import {
   INITIAL_PDF_MODULES,
   INITIAL_LCD_COMPATIBILITY
 } from './data/initialData';
+import { saveRealtimeData, subscribeRealtimeData } from './utils/firebaseSync';
 
 import { LoginPage } from './components/LoginPage';
 import { Navbar, NavTab } from './components/Navbar';
@@ -305,7 +306,7 @@ export default function App() {
     } catch (e) { console.warn('LocalStorage Quota:', e); }
   }, [currentUser]);
 
-  // Real-time Storage Sync across windows/tabs
+  // Real-time Storage & Firestore Online Sync across windows/tabs/devices
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (!e.key || e.newValue === null) return;
@@ -331,106 +332,63 @@ export default function App() {
 
     window.addEventListener('storage', handleStorageChange);
 
-    // BroadcastChannel sync for cross-tab realtime updates
-    let bc: BroadcastChannel | null = null;
-    try {
-      bc = new BroadcastChannel('sm_flasher_bc_channel');
-      bc.onmessage = (event) => {
-        if (!event.data) return;
-        const { key, payload } = event.data;
-        if (key === 'users') {
-          setUsers(payload);
-          setCurrentUser((prev) => {
-            if (!prev) return null;
-            const updatedSelf = payload.find((u: User) => u.id === prev.id);
-            return updatedSelf ? updatedSelf : prev;
-          });
-        }
-        if (key === 'videos') setVideos(payload);
-        if (key === 'gallery') setGalleryItems(payload);
-        if (key === 'pdf_modules') setPdfModules(payload);
-        if (key === 'lcd_items') setLcdItems(payload);
-        if (key === 'announcements') setAnnouncements(payload);
-        if (key === 'chat_messages') setChatMessages(payload);
-        if (key === 'categories') setCategories(payload);
-      };
-    } catch (err) {}
+    // Subscribe to Firestore Real-Time Cloud Sync
+    const unsubUsers = subscribeRealtimeData('users', INITIAL_USERS, (newUsers) => {
+      setUsers(newUsers);
+      setCurrentUser((prev) => {
+        if (!prev) return null;
+        const updatedSelf = newUsers.find((u: User) => u.id === prev.id);
+        return updatedSelf ? updatedSelf : prev;
+      });
+    });
+
+    const unsubVideos = subscribeRealtimeData('videos', INITIAL_VIDEOS, setVideos);
+    const unsubCategories = subscribeRealtimeData('categories', DEFAULT_CATEGORIES, setCategories);
+    const unsubGallery = subscribeRealtimeData('gallery', INITIAL_GALLERY, setGalleryItems);
+    const unsubAnnouncements = subscribeRealtimeData('announcements', INITIAL_ANNOUNCEMENTS, setAnnouncements);
+    const unsubChat = subscribeRealtimeData('chat_messages', INITIAL_CHAT_MESSAGES, setChatMessages);
+    const unsubPdf = subscribeRealtimeData('pdf_modules', INITIAL_PDF_MODULES, setPdfModules);
+    const unsubLcd = subscribeRealtimeData('lcd_items', INITIAL_LCD_COMPATIBILITY, setLcdItems);
+    const unsubRegistrations = subscribeRealtimeData('registrations', INITIAL_REGISTRATIONS, setRegistrations);
+    const unsubCases = subscribeRealtimeData('cases', INITIAL_CASE_POSTS, setCasePosts);
+    const unsubJobs = subscribeRealtimeData('jobs', INITIAL_JOBS, setJobOpenings);
+    const unsubAdminSettings = subscribeRealtimeData('admin_settings', INITIAL_ADMIN_SETTINGS, setAdminSettings);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      if (bc) bc.close();
+      unsubUsers();
+      unsubVideos();
+      unsubCategories();
+      unsubGallery();
+      unsubAnnouncements();
+      unsubChat();
+      unsubPdf();
+      unsubLcd();
+      unsubRegistrations();
+      unsubCases();
+      unsubJobs();
+      unsubAdminSettings();
     };
   }, []);
 
-  const broadcastChange = (key: string, payload: any) => {
-    try {
-      const bc = new BroadcastChannel('sm_flasher_bc_channel');
-      bc.postMessage({ key, payload });
-      bc.close();
-    } catch (e) {}
-  };
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('sm_flasher_users', JSON.stringify(users));
-      broadcastChange('users', users);
-    } catch (e) {}
-  }, [users]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('sm_flasher_videos', JSON.stringify(videos));
-      broadcastChange('videos', videos);
-    } catch (e) {}
-  }, [videos]);
-
-  useEffect(() => { try { localStorage.setItem('sm_flasher_admin_settings', JSON.stringify(adminSettings)); } catch (e) {} }, [adminSettings]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_institution_profile', JSON.stringify(institutionProfile)); } catch (e) {} }, [institutionProfile]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_registrations', JSON.stringify(registrations)); } catch (e) {} }, [registrations]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_alumni', JSON.stringify(alumniList)); } catch (e) {} }, [alumniList]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_cases', JSON.stringify(casePosts)); } catch (e) {} }, [casePosts]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_jobs', JSON.stringify(jobOpenings)); } catch (e) {} }, [jobOpenings]);
-  
-  useEffect(() => {
-    try {
-      localStorage.setItem('sm_flasher_gallery', JSON.stringify(galleryItems));
-      broadcastChange('gallery', galleryItems);
-    } catch (e) {}
-  }, [galleryItems]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('sm_flasher_announcements', JSON.stringify(announcements));
-      broadcastChange('announcements', announcements);
-    } catch (e) {}
-  }, [announcements]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('sm_flasher_chat_messages', JSON.stringify(chatMessages));
-      broadcastChange('chat_messages', chatMessages);
-    } catch (e) {}
-  }, [chatMessages]);
-
-  useEffect(() => { try { localStorage.setItem('sm_flasher_pcd_items', JSON.stringify(pcdItems)); } catch (e) {} }, [pcdItems]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_free_tools', JSON.stringify(freeTools)); } catch (e) {} }, [freeTools]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_zoom_meetings', JSON.stringify(zoomMeetings)); } catch (e) {} }, [zoomMeetings]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_completed_map', JSON.stringify(completedMap)); } catch (e) {} }, [completedMap]);
-  useEffect(() => { try { localStorage.setItem('sm_flasher_notes_map', JSON.stringify(notesMap)); } catch (e) {} }, [notesMap]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('sm_flasher_pdf_modules', JSON.stringify(pdfModules));
-      broadcastChange('pdf_modules', pdfModules);
-    } catch (e) {}
-  }, [pdfModules]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('sm_flasher_lcd_items', JSON.stringify(lcdItems));
-      broadcastChange('lcd_items', lcdItems);
-    } catch (e) {}
-  }, [lcdItems]);
+  // Save changes to Firestore and Local Storage in real-time
+  useEffect(() => { saveRealtimeData('users', users); }, [users]);
+  useEffect(() => { saveRealtimeData('videos', videos); }, [videos]);
+  useEffect(() => { saveRealtimeData('categories', categories); }, [categories]);
+  useEffect(() => { saveRealtimeData('gallery', galleryItems); }, [galleryItems]);
+  useEffect(() => { saveRealtimeData('announcements', announcements); }, [announcements]);
+  useEffect(() => { saveRealtimeData('chat_messages', chatMessages); }, [chatMessages]);
+  useEffect(() => { saveRealtimeData('pdf_modules', pdfModules); }, [pdfModules]);
+  useEffect(() => { saveRealtimeData('lcd_items', lcdItems); }, [lcdItems]);
+  useEffect(() => { saveRealtimeData('registrations', registrations); }, [registrations]);
+  useEffect(() => { saveRealtimeData('cases', casePosts); }, [casePosts]);
+  useEffect(() => { saveRealtimeData('jobs', jobOpenings); }, [jobOpenings]);
+  useEffect(() => { saveRealtimeData('admin_settings', adminSettings); }, [adminSettings]);
+  useEffect(() => { saveRealtimeData('pcd_items', pcdItems); }, [pcdItems]);
+  useEffect(() => { saveRealtimeData('free_tools', freeTools); }, [freeTools]);
+  useEffect(() => { saveRealtimeData('zoom_meetings', zoomMeetings); }, [zoomMeetings]);
+  useEffect(() => { saveRealtimeData('completed_map', completedMap); }, [completedMap]);
+  useEffect(() => { saveRealtimeData('notes_map', notesMap); }, [notesMap]);
 
   // PDF Module Handlers
   const handleAddPdfModule = (newModule: PdfModule) => setPdfModules((prev) => [newModule, ...prev]);

@@ -1,0 +1,27 @@
+{
+  "entities": {
+    "AppState": {
+      "title": "AppState",
+      "description": "Global application state document synchronized in real-time",
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "string",
+          "description": "JSON serialized items or collection state"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last modification"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/app_state/{docId}": {
+      "schema": {
+        "$ref": "#/entities/AppState"
+      },
+      "description": "Real-time state collections for users, videos, gallery, announcements, pdf modules, chat, and settings"
+    }
+  }
+}

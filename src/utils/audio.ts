@@ -149,14 +149,17 @@ export const speakIndonesian = (text: string) => {
   try {
     window.speechSynthesis.cancel(); // Stop any ongoing speech
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Clean text punctuation for smooth speech synthesis
+    const cleanText = text.replace(/,+/g, ',').replace(/!+/g, '!').trim();
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = 'id-ID';
-    utterance.pitch = 1.3; // Higher pitch for young female voice
-    utterance.rate = 0.98; // Natural conversational rate
+    utterance.pitch = 1.35; // Suara wanita muda remaja
+    utterance.rate = 0.96; // Kecepatan ucapan alami Bahasa Indonesia
 
     const setVoiceAndSpeak = () => {
       const voices = window.speechSynthesis.getVoices();
-      // Try to find Indonesian voice or female voice
+      // Prioritize Indonesian female voice
       const idVoice =
         voices.find(
           (v) =>
@@ -201,7 +204,7 @@ export const speakAiAnalysisResult = () => {
  */
 export const speakLoginSuccess = () => {
   speakIndonesian(
-    'selamat datang di Markas PT. SM Flasher Training Centre Para Teknisi Juara juara, Silahkan Pelajari dengan Cermat dan Sukses Selalu'
+    'Selamat datang di SM Flasher, Selamat Bergabung'
   );
 };
 
